@@ -1,0 +1,100 @@
+{
+  "clean": {
+    "condition": "Clean",
+    "severity": 0,
+    "map50_mean": 8.901216666195676,
+    "map50_std": 0.0,
+    "map50_95_mean": 2.5081422695270263,
+    "map50_95_std": 0.0
+  },
+  "fog_s2": {
+    "condition": "Fog (Sev 2)",
+    "family": "fog",
+    "severity": 2,
+    "map50_mean": 7.1040222748935165,
+    "map50_std": 0.1255591528751806,
+    "map50_95_mean": 2.152657302841075,
+    "map50_95_std": 0.011962911755723286,
+    "retention_rate": 79.80956470672824
+  },
+  "rain_s2": {
+    "condition": "Rain (Sev 2)",
+    "family": "rain",
+    "severity": 2,
+    "map50_mean": 7.823754021937496,
+    "map50_std": 0.6144051097371328,
+    "map50_95_mean": 2.400939598953297,
+    "map50_95_std": 0.16320891508588797,
+    "retention_rate": 87.89533291162229
+  },
+  "low_light_s2": {
+    "condition": "Low_light (Sev 2)",
+    "family": "low_light",
+    "severity": 2,
+    "map50_mean": 6.6958735115423496,
+    "map50_std": 0.023448529091355568,
+    "map50_95_mean": 2.118422316778442,
+    "map50_95_std": 0.014512969968248699,
+    "retention_rate": 75.22425037659626
+  },
+  "motion_blur_s2": {
+    "condition": "Motion_blur (Sev 2)",
+    "family": "motion_blur",
+    "severity": 2,
+    "map50_mean": 7.816454232264403,
+    "map50_std": 0.0,
+    "map50_95_mean": 2.2443604649506383,
+    "map50_95_std": 0.0,
+    "retention_rate": 87.81332401388569
+  },
+  "fog_s3": {
+    "condition": "Fog (Sev 3)",
+    "family": "fog",
+    "severity": 3,
+    "map50_mean": 5.9136804384991875,
+    "map50_std": 0.2564597396896608,
+    "map50_95_mean": 1.7838589602597006,
+    "map50_95_std": 0.0363184308574756,
+    "retention_rate": 66.43676544755603
+  },
+  "rain_s3": {
+    "condition": "Rain (Sev 3)",
+    "family": "rain",
+    "severity": 3,
+    "map50_mean": 7.5052343647849495,
+    "map50_std": 0.3732166722190432,
+    "map50_95_mean": 2.298022803412921,
+    "map50_95_std": 0.08069954047975009,
+    "retention_rate": 84.31694953890656
+  },
+  "low_light_s3": {
+    "condition": "Low_light (Sev 3)",
+    "family": "low_light",
+    "severity": 3,
+    "map50_mean": 5.850631378598138,
+    "map50_std": 0.053255571402489196,
+    "map50_95_mean": 1.8983232815023614,
+    "map50_95_std": 0.0214224520342584,
+    "retention_rate": 65.7284458743398
+  },
+  "motion_blur_s3": {
+    "condition": "Motion_blur (Sev 3)",
+    "family": "motion_blur",
+    "severity": 3,
+    "map50_mean": 7.323711191133971,
+    "map50_std": 8.881784197001252e-16,
+    "map50_95_mean": 2.261642327096812,
+    "map50_95_std": 0.0,
+    "retention_rate": 82.2776420997297
+  },
+  "mean_adverse_s2": {
+    "map50_mean": 7.360026010159441,
+    "map50_95_mean": 2.229094920880863,
+    "retention_rate": 82.68561800220812
+  },
+  "mean_adverse_s3": {
+    "map50_mean": 6.648314343254062,
+    "map50_95_mean": 2.060461843067949,
+    "retention_rate": 74.68995074013303
+  }
+}

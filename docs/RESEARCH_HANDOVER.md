@@ -66,7 +66,9 @@
 | **Stage 1** | Scratch JEPA (바닥 학습) + Linear Probe | 2,048장 | 200 st | `0.10%` | `0.02%` | - | 표현 붕괴 (Rank 2.4) |
 | **Stage 2** | Foundation ViT-S v1 (Frozen + 단일헤드) | 2,048장 | 100 ep | `5.41%` | `1.55%` | - | Foundation 모델 시각 표현력 복원 |
 | **Stage 3** | **Foundation ViT-S v2 (FPN + CIoU + SLOTS=1)** | **2,048장** | **10 ep** | **`16.16%`** | **`5.77%`** | - | **순수 아키텍처 혁신 기여 (+10.75%p)** 🚀 |
-| **Stage 4** | **Foundation ViT-S v2 (Full Scale e2e)** | **70,000장** | **12 ep** | **`43.42%`** | **`21.20%`** | **`36.30%`** | **순수 데이터 스케일업 기여 (+27.26%p)** 🏆 |
+| **Stage 4** | **Foundation ViT-S v2 (Full Scale Supervised)** | **70,000장** | **12 ep** | **`43.42%`** | **`21.20%`** | **`36.30%`** | **순수 데이터 스케일업 기여 (+27.26%p)** 🏆 |
+| **Stage 5** | **Natural-Noise I-JEPA ViT-S + Detector (Ours)** | **70,000장** | **5 ep pre + 12 ep det** | **`39.63%`** | **`19.03%`** | **`34.96%`** | **`97.5%` 악천후 방어율 달성 (Fog 97.1%, Rain 97.2%)** 🛡️ |
+
 
 ---
 
