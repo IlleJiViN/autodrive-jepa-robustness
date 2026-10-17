@@ -1,0 +1,15 @@
+{
+  "seed": 17,
+  "image_size": [384, 640],
+  "epochs": 25,
+  "batch_size": 16,
+  "learning_rate": 0.0003,
+  "weight_decay": 0.01,
+  "pre_nms_candidates_per_image": 300,
+  "max_detections_per_image": 100,
+  "nms_iou": 0.65,
+  "eval_corruption_severities": [1, 2, 3, 4, 5],
+  "training_view": "clean_for_every_encoder",
+  "encoder_gradients": false,
+  "head_selection": "fixed_final_epoch_no_validation_selection"
+}

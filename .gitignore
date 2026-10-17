@@ -1,0 +1,42 @@
+# Python byte code and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Large binary checkpoints and model weights
+*.pt
+*.pth
+*.onnx
+*.ckpt
+*.safetensors
+*.zip
+*.tar.gz
+*.tmp
+
+# Experiment runs and outputs
+runs/
+
+# Dataset images and machine-specific local manifests
+data/bdd100k/
+data/manifests/*_local.jsonl
+data/manifests/*_labeled.jsonl
+
+# Internal VM deployment helpers
+deployment_manifest.json
+tools/deploy_vm.ps1
+tools/sync_vm.ps1
+tools/remote_exec.py
+tools/daemon_runner.py
+tools/check_full_bdd100k.py
+tools/find_bdd_repo.py
+

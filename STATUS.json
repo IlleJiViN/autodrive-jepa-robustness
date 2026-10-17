@@ -1,0 +1,153 @@
+{
+  "date_seoul": "2026-10-07",
+  "workspace": "owner/jwj-01",
+  "remote_root": "/home/coder/autodrive-jepa-robustness",
+  "gpu": "NVIDIA GeForce RTX 5090",
+  "gpu_memory_mib": 32607,
+  "runtime_python": "/home/coder/venv/bin/python",
+  "torch": "2.14.1+cu130",
+  "cuda_build": "13.0",
+  "cuda_available": true,
+  "sm_120_compiled": true,
+  "actual_driving_data_ready": true,
+  "dataset_scope": "BDD100K_public_mirror_2048_train_256_validation_legacy_detection_labels_matched",
+  "training_started": true,
+  "pilot_training_complete": true,
+  "optimizer_steps_per_model": 2760,
+  "train_image_presentations_per_model": 22080,
+  "checkpoints_created": true,
+  "local_checkpoint_backup": "continuation_6_files_sha256_verified",
+  "functional_tests_executed": true,
+  "functional_tests_passed": 5,
+  "measured_research_performance": {
+    "metric": "clean_corrupt_pooled_embedding_cosine_20_synthetic_conditions",
+    "corruption_jepa_mean": 0.9401644736528396,
+    "clean_jepa_mean": 0.738380016386509,
+    "difference": 0.20178445726633065,
+    "detection_map": null,
+    "scope": "one_seed_subset_final_encoder_after_200_plus_2560_optimizer_steps"
+  },
+  "implementation_scope": "phase1_dataset_import_masked_jepa_training_resume_representation_evaluation_custom_frozen_encoder_detection_probe",
+  "results_report": "docs/continuation_results.md",
+  "next_dependency": "standardized_detector_baseline_full_data_multiseed_and_real_weather_holdout",
+  "continuation_training_complete": true,
+  "new_training_steps_per_model": 2560,
+  "continuation_epochs": 10,
+  "detection_labels_ready": true,
+  "detection_boxes": 42846,
+  "yolo_label_export_ready": true,
+  "functional_test_scope": "prior_pilot_5_tests_not_repeated_after_continuation_changes",
+  "class_presence_probe": {
+    "corruption_clean_ap": 0.44723298796785926,
+    "corruption_corrupt_ap": 0.4299458701832702,
+    "clean_clean_ap": 0.43053167258148206,
+    "random_corrupt_ap": 0.40885982368676527,
+    "random_clean_ap": 0.42894605819449655,
+    "supported_classes": 9,
+    "clean_corrupt_ap": 0.4099942985900176,
+    "task": "frozen_image_level_multilabel_presence_not_detection_map"
+  },
+  "detection_results_report": "docs/detector_results.md",
+  "detection_probe": {
+    "run": "runs/detector-probe-seed17-v2",
+    "status": "complete",
+    "seed": 17,
+    "train_images": 2048,
+    "train_boxes": 37868,
+    "validation_images": 256,
+    "validation_boxes": 4978,
+    "validation_supported_classes": 9,
+    "synthetic_corruption_conditions_per_model": 20,
+    "detector_head_epochs": 25,
+    "encoder_cumulative_steps": {
+      "random": 0,
+      "clean": 2760,
+      "corruption": 2760
+    },
+    "clean_map50": {
+      "random": 0.002427522726941681,
+      "clean": 0.0012346030916776983,
+      "corruption": 0.0019022967809196
+    },
+    "corrupt_mean_map50": {
+      "random": 0.00138802302973736,
+      "clean": 0.0009578234162017773,
+      "corruption": 0.0010480573652548615
+    },
+    "corrupt_mean_map50_95": {
+      "random": 0.0003336637557643248,
+      "clean": 0.00023272454622680783,
+      "corruption": 0.00027977064452633637
+    },
+    "interpretation": "corruption_JEPA modestly_exceeds_clean_JEPA_on_corrupt_mean_but_remains_below_random_with_very_low_absolute_mAP",
+    "initial_run_excluded": "center_offset_loss_decoder_mismatch",
+    "local_backup_receipt": "runs/detector_local_backup.json",
+    "sha256_verified_local_checkpoints": 3,
+    "scope": "single_seed_custom_probe_small_legacy_BDD_subset_synthetic_corruptions_not_driving_safety"
+  },
+  "cost_benchmark": {
+    "status": "complete",
+    "report": "docs/cost_benchmark_results.md",
+    "summary": "runs/cost_benchmark_summary.json",
+    "workspace": "owner/jwj-01",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "torch": "2.14.1+cu130",
+    "cuda_build": "13.0",
+    "seed": 17,
+    "training_steps_per_method": 2560,
+    "power_sampling_interval_ms": 500,
+    "methods": {
+      "clean_jepa": {
+        "job_wall_seconds": 140.3398276700027,
+        "idle_adjusted_gpu_energy_wh": 9.325297443948417,
+        "mean_corrupt_map50_fraction": 0.0014715337818252765
+      },
+      "corruption_jepa": {
+        "job_wall_seconds": 148.03974964900408,
+        "idle_adjusted_gpu_energy_wh": 9.959262286805558,
+        "mean_corrupt_map50_fraction": 0.0008352839062056802
+      },
+      "corruption_aware_masked_autoencoder": {
+        "job_wall_seconds": 120.06026174800354,
+        "idle_adjusted_gpu_energy_wh": 5.41803120763889,
+        "mean_corrupt_map50_fraction": 0.0014358015636623319
+      }
+    },
+    "cost_claim_supported": false,
+    "interpretation": "In this single-seed custom implementation pilot, corruption-aware masked autoencoding used less RTX5090 time and GPU-board energy than corruption-aware JEPA. Detection mAP remained extremely low; no general efficiency, real-weather or safety claim.",
+    "local_backup_receipt": "runs/cost_benchmark_local_backup.json",
+    "sha256_verified_checkpoints": 7,
+    "evidence_files_backed_up": 128
+  },
+  "object_target_pilot": {
+    "status": "implementation_validated_research_not_run",
+    "updated_seoul": "2026-10-07T14:51:37.711738+09:00",
+    "report": "docs/object_target_pilot.md",
+    "working_interpretation": "boxes_define_whole_object_targets_with_full_image_context",
+    "pretraining_arms": [
+      "random_jepa",
+      "object_jepa",
+      "random_mae",
+      "object_mae",
+      "optional_mask_only_jepa"
+    ],
+    "functional_tests": {
+      "passed": 8,
+      "gpu": "NVIDIA GeForce RTX 4060 Ti",
+      "torch": "2.14.0+cu130",
+      "scope": "synthetic_fixtures_and_YOLO_conversion_mock_not_model_quality",
+      "output": "runs/object_pretraining_test_output.txt"
+    },
+    "oracle_box_geometry_audit": "runs/object_mask_audit.json",
+    "actual_yolo_inference_executed": false,
+    "research_pretraining_executed": false,
+    "semantic_probe_real_data_executed": false,
+    "new_research_checkpoints": [],
+    "action_policy_implemented": false,
+    "action_evaluation_executed": false,
+    "action_dependency": "true_action_labels_ego_track_data_or_CARLA_closed_loop_environment",
+    "remote_blocker": "Coder_endpoint_DNS_failure; local_Tailscale_NoState; service_restart_denied",
+    "source_checks": "AST_and_CLI_help",
+    "test_output_sha256": "faea93fd078814100bfa202f3392e50b4cc5b5d05ad779adddac3f0432ca15ea"
+  }
+}

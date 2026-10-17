@@ -1,0 +1,6 @@
+torch>=2.0
+torchvision
+timm
+numpy>=1.24
+Pillow>=10
+pytest

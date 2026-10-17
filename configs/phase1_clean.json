@@ -1,0 +1,59 @@
+{
+  "seed": 17,
+  "data": {
+    "train_manifest": "data/manifests/bdd100k_train.jsonl",
+    "val_manifest": "data/manifests/bdd100k_val.jsonl",
+    "image_size": [
+      384,
+      640
+    ],
+    "num_workers": 4
+  },
+  "model": {
+    "patch_size": 16,
+    "dim": 384,
+    "depth": 12,
+    "heads": 6,
+    "predictor_dim": 192,
+    "predictor_depth": 4,
+    "predictor_heads": 6,
+    "mask_ratio": 0.6
+  },
+  "corruption": {
+    "families": [
+      "fog",
+      "rain",
+      "motion_blur",
+      "low_light"
+    ],
+    "train_severities": [
+      1,
+      2,
+      3
+    ],
+    "eval_severities": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "train_families": [
+      "clean"
+    ]
+  },
+  "training": {
+    "epochs": 50,
+    "batch_size": 8,
+    "learning_rate": 0.00015,
+    "weight_decay": 0.05,
+    "warmup_fraction": 0.1,
+    "ema_start": 0.996,
+    "variance_weight": 0.05,
+    "variance_floor": 0.1,
+    "gradient_clip": 1.0,
+    "validation_batches": 64,
+    "amp_bfloat16": true,
+    "save_every_steps": 500
+  }
+}
