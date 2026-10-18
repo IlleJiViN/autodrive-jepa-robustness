@@ -1,0 +1,55 @@
+{
+  "baseline_representation": {
+    "effective_rank": 41.6059455871582,
+    "uniformity": -1.3824026584625244,
+    "inter_image_cosine": 0.6246,
+    "mean_invariance_cosine": 0.8706598579883575,
+    "val_jepa_prediction_loss": 0.5157524142414331
+  },
+  "post_representation": {
+    "effective_rank": 152.88,
+    "uniformity": -0.7112,
+    "inter_image_cosine": 0.8214,
+    "mean_invariance_cosine": 0.9057,
+    "delta_effective_rank": 111.28
+  },
+  "detector_benchmark": {
+    "clean": {
+      "condition": "Clean",
+      "map50_mean": 13.89,
+      "map50_std": 0.0,
+      "map50_95_mean": 4.78,
+      "map50_95_std": 0.0
+    },
+    "fog_s2": {
+      "condition": "Fog (Sev 2)",
+      "map50_mean": 10.93,
+      "retention_rate": 78.7
+    },
+    "rain_s2": {
+      "condition": "Rain (Sev 2)",
+      "map50_mean": 12.32,
+      "retention_rate": 88.7
+    },
+    "low_light_s2": {
+      "condition": "Low_light (Sev 2)",
+      "map50_mean": 10.43,
+      "retention_rate": 75.1
+    },
+    "motion_blur_s2": {
+      "condition": "Motion_blur (Sev 2)",
+      "map50_mean": 13.67,
+      "retention_rate": 98.4
+    },
+    "mean_adverse_s2": {
+      "map50_mean": 11.84,
+      "retention_rate": 85.2
+    }
+  },
+  "comparison_reference": {
+    "pure_supervised_vit_2k_map50": 16.16,
+    "old_collapsed_jepa_2k_map50": 8.90,
+    "old_collapsed_uniformity": -0.029,
+    "gain_over_old_jepa": 4.99
+  }
+}

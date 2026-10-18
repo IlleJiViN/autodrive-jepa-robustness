@@ -17,6 +17,57 @@ def select_tokens(tokens: torch.Tensor, indices: torch.Tensor) -> torch.Tensor:
     return tokens.gather(1, indices.unsqueeze(-1).expand(-1, -1, tokens.shape[-1]))
 
 
+def sample_2d_block_mask(
+    batch_size: int,
+    grid: tuple[int, int] = (24, 40),
+    visible_count: int = 480,
+    num_blocks: int = 4,
+    device: torch.device | str = "cpu",
+    generator: torch.Generator | None = None,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """
+    Samples 2D contiguous rectangular block masks instead of point-wise random masking.
+    Generates contiguous target regions so the network cannot rely on trivial local smoothing.
+    Returns (visible_indices, masked_indices) with exact shapes (B, visible_count) and (B, masked_count).
+    """
+    H, W = grid
+    total = H * W
+    masked_count = total - visible_count
+
+    y = torch.arange(H, device=device).float().unsqueeze(1).expand(H, W)
+    x = torch.arange(W, device=device).float().unsqueeze(0).expand(H, W)
+
+    heatmaps = torch.zeros(batch_size, H, W, device=device)
+    for b in range(batch_size):
+        for _ in range(num_blocks):
+            cy = torch.randint(0, H, (1,), device=device, generator=generator).float()
+            cx = torch.randint(0, W, (1,), device=device, generator=generator).float()
+            sigma_y = torch.randint(2, 6, (1,), device=device, generator=generator).float()
+            sigma_x = torch.randint(3, 9, (1,), device=device, generator=generator).float()
+            dist_sq = ((y - cy) / sigma_y).pow(2) + ((x - cx) / sigma_x).pow(2)
+            heatmaps[b] += torch.exp(-0.5 * dist_sq)
+
+    flat_heat = heatmaps.view(batch_size, total)
+    flat_heat = flat_heat + torch.rand(batch_size, total, device=device, generator=generator) * 1e-4
+    perm = flat_heat.argsort(dim=1, descending=True)
+    masked = perm[:, :masked_count]
+    visible = perm[:, masked_count:]
+    return visible, masked
+
+
+def uniformity_loss(z: torch.Tensor, t: float = 2.0) -> torch.Tensor:
+    """
+    Wang & Isola (ICML 2020) Uniformity Loss for batch instance representations.
+    Forces representations to spread uniformly on the hypersphere, preventing collapse.
+    """
+    if len(z) < 2:
+        return torch.tensor(0.0, device=z.device)
+    z_norm = F.normalize(z.float(), dim=-1)
+    sq_pdist = torch.pdist(z_norm, p=2).pow(2)
+    val = sq_pdist.mul(-t).exp().mean().clamp_min(1e-12)
+    return val.log()
+
+
 def ema_momentum(start: float = 0.996, step: int = 0, total: int = 1000) -> float:
     """Cosine momentum schedule from start (e.g. 0.996) to 1.0."""
     return 1.0 - (1.0 - start) * (1.0 + math.cos(math.pi * min(step / max(total, 1), 1.0))) / 2.0
@@ -117,6 +168,10 @@ class FoundationCorruptionJEPA(nn.Module):
         variance_floor: float = 1.0,
         variance_weight: float = 1.0,
         covariance_weight: float = 0.5,
+        uniformity_weight: float = 0.5,
+        masking_strategy: str = "block",
+        num_mask_blocks: int = 4,
+        freeze_lower_blocks: int = 4,
     ):
         super().__init__()
         self.model_name = model_name
@@ -125,6 +180,10 @@ class FoundationCorruptionJEPA(nn.Module):
         self.variance_floor = variance_floor
         self.variance_weight = variance_weight
         self.covariance_weight = covariance_weight
+        self.uniformity_weight = uniformity_weight
+        self.masking_strategy = masking_strategy
+        self.num_mask_blocks = num_mask_blocks
+        self.freeze_lower_blocks = freeze_lower_blocks
 
         self.grid = (img_size[0] // 16, img_size[1] // 16)  # (24, 40)
         self.token_count = self.grid[0] * self.grid[1]       # 960 tokens
@@ -139,6 +198,12 @@ class FoundationCorruptionJEPA(nn.Module):
             img_size=img_size,
         )
         self.embed_dim = self.online.embed_dim
+
+        # Freeze lower blocks to preserve low-level edge/corner detectors
+        if freeze_lower_blocks > 0:
+            self.online.patch_embed.requires_grad_(False)
+            for blk in self.online.blocks[:freeze_lower_blocks]:
+                blk.requires_grad_(False)
 
         # Teacher Target Encoder (EMA)
         self.target = timm.create_model(
@@ -207,8 +272,18 @@ class FoundationCorruptionJEPA(nn.Module):
             metrics: dict of detached scalar metrics.
         """
         batch_size = clean.shape[0]
-        permutation = torch.rand(batch_size, self.token_count, device=clean.device, generator=generator).argsort(dim=1)
-        visible, masked = permutation[:, :self.visible_count], permutation[:, self.visible_count:]
+        if self.masking_strategy == "block":
+            visible, masked = sample_2d_block_mask(
+                batch_size=batch_size,
+                grid=self.grid,
+                visible_count=self.visible_count,
+                num_blocks=self.num_mask_blocks,
+                device=clean.device,
+                generator=generator,
+            )
+        else:
+            permutation = torch.rand(batch_size, self.token_count, device=clean.device, generator=generator).argsort(dim=1)
+            visible, masked = permutation[:, :self.visible_count], permutation[:, self.visible_count:]
 
         # 1. Student Context Encoder: processes ONLY visible tokens
         context = self.forward_encoder(self.online, view, visible=visible)  # (B, N_visible, D)
@@ -222,7 +297,7 @@ class FoundationCorruptionJEPA(nn.Module):
             target = select_tokens(target_tokens, masked).float()
             target = F.layer_norm(target, (target.shape[-1],))
 
-        # 4. Losses: Prediction + Instance/Token VICReg Regularization
+        # 4. Losses: Prediction + Instance/Token VICReg Regularization + Wang & Isola Uniformity
         pred_norm = F.layer_norm(prediction.float(), (prediction.shape[-1],))
         prediction_loss = F.smooth_l1_loss(pred_norm, target)
 
@@ -243,7 +318,16 @@ class FoundationCorruptionJEPA(nn.Module):
         if self.covariance_weight > 0.0 and batch_size > 1:
             cov_loss = covariance_decorrelation_loss(y_instance)
 
-        total_loss = prediction_loss + (self.variance_weight * variance_loss) + (self.covariance_weight * cov_loss)
+        unif_loss = torch.tensor(0.0, device=clean.device)
+        if self.uniformity_weight > 0.0 and batch_size > 1:
+            unif_loss = uniformity_loss(z_instance)
+
+        total_loss = (
+            prediction_loss
+            + (self.variance_weight * variance_loss)
+            + (self.covariance_weight * cov_loss)
+            + (self.uniformity_weight * unif_loss)
+        )
 
         # Inter-image cosine similarity across batch (diagnostic for instance collapse)
         inter_cos = torch.tensor(0.0, device=clean.device)
@@ -259,6 +343,7 @@ class FoundationCorruptionJEPA(nn.Module):
             "instance_var_loss": instance_variance_loss.detach(),
             "token_var_loss": token_variance_loss.detach(),
             "covariance_loss": cov_loss.detach(),
+            "uniformity_loss": unif_loss.detach(),
             "total_loss": total_loss.detach(),
             "instance_std": instance_std.mean().detach(),
             "token_std": token_std.mean().detach(),
