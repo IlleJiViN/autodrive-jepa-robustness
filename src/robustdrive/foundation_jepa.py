@@ -115,8 +115,8 @@ class FoundationCorruptionJEPA(nn.Module):
         predictor_depth: int = 4,
         predictor_heads: int = 6,
         variance_floor: float = 1.0,
-        variance_weight: float = 0.1,
-        covariance_weight: float = 0.05,
+        variance_weight: float = 1.0,
+        covariance_weight: float = 0.5,
     ):
         super().__init__()
         self.model_name = model_name
@@ -222,25 +222,47 @@ class FoundationCorruptionJEPA(nn.Module):
             target = select_tokens(target_tokens, masked).float()
             target = F.layer_norm(target, (target.shape[-1],))
 
-        # 4. Losses: Prediction + VICReg Variance Regularization + Covariance Decorrelation
-        prediction_loss = F.smooth_l1_loss(prediction.float(), target)
+        # 4. Losses: Prediction + Instance/Token VICReg Regularization
+        pred_norm = F.layer_norm(prediction.float(), (prediction.shape[-1],))
+        prediction_loss = F.smooth_l1_loss(pred_norm, target)
 
+        # Instance-level pooled representation across batch (B, D) to prevent cross-image collapse
+        z_instance = context.float().mean(dim=1)  # (B, D)
+        y_instance = F.layer_norm(z_instance, (z_instance.shape[-1],))
+        instance_std = y_instance.std(dim=0, unbiased=False)
+        instance_variance_loss = F.relu(self.variance_floor - instance_std).mean()
+
+        # Token-level representation across patches (B * N_visible, D)
         context_flat = context.float().flatten(0, 1)  # (B * N_visible, D)
-        context_std = context_flat.std(dim=0, unbiased=False)
-        variance_loss = F.relu(self.variance_floor - context_std).mean()
+        token_std = context_flat.std(dim=0, unbiased=False)
+        token_variance_loss = F.relu(self.variance_floor - token_std).mean()
+
+        variance_loss = 0.6 * instance_variance_loss + 0.4 * token_variance_loss
 
         cov_loss = torch.tensor(0.0, device=clean.device)
-        if self.covariance_weight > 0.0:
-            cov_loss = covariance_decorrelation_loss(context_flat)
+        if self.covariance_weight > 0.0 and batch_size > 1:
+            cov_loss = covariance_decorrelation_loss(y_instance)
 
         total_loss = prediction_loss + (self.variance_weight * variance_loss) + (self.covariance_weight * cov_loss)
+
+        # Inter-image cosine similarity across batch (diagnostic for instance collapse)
+        inter_cos = torch.tensor(0.0, device=clean.device)
+        if batch_size > 1:
+            norm_inst = F.normalize(z_instance, dim=-1)
+            sim_mat = norm_inst @ norm_inst.T
+            mask_offdiag = ~torch.eye(batch_size, dtype=torch.bool, device=clean.device)
+            inter_cos = sim_mat[mask_offdiag].mean()
 
         metrics = {
             "prediction_loss": prediction_loss.detach(),
             "variance_loss": variance_loss.detach(),
+            "instance_var_loss": instance_variance_loss.detach(),
+            "token_var_loss": token_variance_loss.detach(),
             "covariance_loss": cov_loss.detach(),
             "total_loss": total_loss.detach(),
-            "context_std": context_std.mean().detach(),
+            "instance_std": instance_std.mean().detach(),
+            "token_std": token_std.mean().detach(),
+            "inter_image_cosine": inter_cos.detach(),
             "target_std": target.flatten(0, 1).std(dim=0, unbiased=False).mean().detach(),
         }
         return total_loss, metrics
