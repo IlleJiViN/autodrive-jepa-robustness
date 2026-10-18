@@ -294,33 +294,6 @@ def run_comprehensive_weather_benchmark(
     return results
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Anti-Collapse JEPA Pilot 2k A/B Benchmark")
-    parser.add_argument("--pretrain-epochs", type=int, default=10)
-    parser.add_argument("--detect-epochs", type=int, default=10)
-    parser.add_argument("--batch-size", type=int, default=32)
-    parser.add_argument("--workers", type=int, default=4)
-    parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
-    parser.add_argument("--output-dir", type=str, default=str(ROOT / "runs/anti-collapse-pilot-2k"))
-    parser.add_argument("--skip-pretrain", action="store_true", help="Skip Step 1 if encoder checkpoint exists")
-    args = parser.parse_args()
-
-    out_dir = Path(args.output_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    train_manifest = ROOT / "data/manifests/bdd100k_train_local.jsonl"
-    val_manifest = ROOT / "data/manifests/bdd100k_val_local.jsonl"
-    train_records = [json.loads(l) for l in train_manifest.read_text(encoding="utf-8").strip().splitlines() if l.strip()]
-    val_records = [json.loads(l) for l in val_manifest.read_text(encoding="utf-8").strip().splitlines() if l.strip()]
-
-    print("=" * 80)
-    print("ANTI-COLLAPSE JEPA 2,048-IMAGE PILOT BENCHMARK")
-    print(f"Hardware: {args.device} ({torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU'})")
-    print(f"Train samples: {len(train_records):,} | Val samples: {len(val_records):,}")
-    print("=" * 80)
-
-    encoder_path = out_dir / "anti_collapse_jepa_student.pt"
-
 def run_pretrain_phase(args, out_dir, train_records, val_records, encoder_path) -> tuple[dict, dict]:
     if args.skip_pretrain and encoder_path.exists():
         print(f"\n[Step 1] Found existing pretrained student encoder at {encoder_path}, skipping Step 1 pretraining!")
@@ -329,18 +302,19 @@ def run_pretrain_phase(args, out_dir, train_records, val_records, encoder_path) 
         return baseline_metrics, post_metrics
 
     print("\n[Step 1] Initializing Anti-Collapse FoundationCorruptionJEPA...")
+    print(f"  Config: var_w={args.variance_weight}, cov_w={args.covariance_weight}, unif_w={args.uniformity_weight}, lr={args.pretrain_lr}, freeze_blocks={args.freeze_lower_blocks}")
     jepa_model = FoundationCorruptionJEPA(
         model_name="vit_small_patch16_384",
         img_size=(384, 640),
         pretrained=True,
         mask_ratio=0.50,
         variance_floor=1.0,
-        variance_weight=1.0,
-        covariance_weight=0.5,
-        uniformity_weight=0.5,
+        variance_weight=args.variance_weight,
+        covariance_weight=args.covariance_weight,
+        uniformity_weight=args.uniformity_weight,
         masking_strategy="block",
         num_mask_blocks=4,
-        freeze_lower_blocks=4,
+        freeze_lower_blocks=args.freeze_lower_blocks,
     ).to(args.device)
 
     print("\n[Step 1] Evaluating Baseline ViT-S Representation Quality (Epoch 0)...")
@@ -364,7 +338,7 @@ def run_pretrain_phase(args, out_dir, train_records, val_records, encoder_path) 
     warmup_steps = int(0.10 * total_steps)
 
     trainable_params = [p for p in jepa_model.online.parameters() if p.requires_grad] + list(jepa_model.predictor.parameters())
-    optimizer = AdamW(trainable_params, lr=5e-5, weight_decay=0.05, betas=(0.9, 0.98))
+    optimizer = AdamW(trainable_params, lr=args.pretrain_lr, weight_decay=0.05, betas=(0.9, 0.98))
 
     print(f"\n[Step 1] Pretraining for {args.pretrain_epochs} epochs ({total_steps} steps)...")
     start_t = time.time()
@@ -374,10 +348,10 @@ def run_pretrain_phase(args, out_dir, train_records, val_records, encoder_path) 
         for step, (clean_imgs, view_imgs) in enumerate(train_loader):
             g_step = (epoch - 1) * steps_per_epoch + step + 1
             if g_step < warmup_steps:
-                cur_lr = 5e-5 * max(0.01, float(g_step) / max(1, warmup_steps))
+                cur_lr = args.pretrain_lr * max(0.01, float(g_step) / max(1, warmup_steps))
             else:
                 progress = float(g_step - warmup_steps) / max(1, total_steps - warmup_steps)
-                cur_lr = 5e-5 * (0.01 + 0.99 * 0.5 * (1.0 + math.cos(math.pi * progress)))
+                cur_lr = args.pretrain_lr * (0.01 + 0.99 * 0.5 * (1.0 + math.cos(math.pi * progress)))
             for pg in optimizer.param_groups:
                 pg["lr"] = cur_lr
 
@@ -424,6 +398,13 @@ def main():
     parser.add_argument("--detect-epochs", type=int, default=10)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument("--variance-weight", type=float, default=1.0)
+    parser.add_argument("--covariance-weight", type=float, default=0.5)
+    parser.add_argument("--uniformity-weight", type=float, default=0.5)
+    parser.add_argument("--pretrain-lr", type=float, default=5e-5)
+    parser.add_argument("--freeze-lower-blocks", type=int, default=4)
+    parser.add_argument("--hard-freeze-epochs", type=int, default=2, help="Number of initial detector epochs to hard-freeze backbone (set 0 for smooth linear warmup)")
+    parser.add_argument("--report-path", type=str, default=str(ROOT / "results/anti_collapse_pilot_2k_report.json"))
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--output-dir", type=str, default=str(ROOT / "runs/anti-collapse-pilot-2k"))
     parser.add_argument("--skip-pretrain", action="store_true", help="Skip Step 1 if encoder checkpoint exists")
@@ -483,20 +464,25 @@ def main():
 
     det_steps_per_epoch = len(det_loader)
     total_det_steps = args.detect_epochs * det_steps_per_epoch
+    warmup_det_steps = int(0.10 * total_det_steps)
     det_start_t = time.time()
 
     for epoch in range(1, args.detect_epochs + 1):
         detector.train()
-        # Head Warmup: Freeze backbone during Epochs 1-2 to protect pretrained weights!
-        freeze_backbone = (epoch <= 2)
+        freeze_backbone = (epoch <= args.hard_freeze_epochs)
         for p in detector.backbone.parameters():
             p.requires_grad = not freeze_backbone
 
         ep_loss, ep_obj, ep_cls, ep_box = 0.0, 0.0, 0.0, 0.0
         for step, (images, targets) in enumerate(det_loader):
             g_step = (epoch - 1) * det_steps_per_epoch + step + 1
-            progress = float(g_step) / float(total_det_steps)
-            lr_mult = 0.01 + 0.99 * 0.5 * (1.0 + math.cos(math.pi * progress))
+            if args.hard_freeze_epochs == 0 and g_step < warmup_det_steps:
+                lr_mult = max(0.01, float(g_step) / max(1, warmup_det_steps))
+            else:
+                adj_step = g_step - (warmup_det_steps if args.hard_freeze_epochs == 0 else 0)
+                adj_total = max(1, total_det_steps - (warmup_det_steps if args.hard_freeze_epochs == 0 else 0))
+                progress = float(adj_step) / float(adj_total)
+                lr_mult = 0.01 + 0.99 * 0.5 * (1.0 + math.cos(math.pi * progress))
 
             optimizer_det.param_groups[0]["lr"] = (0.0 if freeze_backbone else 2e-5 * lr_mult)
             optimizer_det.param_groups[1]["lr"] = 2e-4 * lr_mult
@@ -542,6 +528,14 @@ def main():
     )
 
     report = {
+        "config": {
+            "variance_weight": args.variance_weight,
+            "covariance_weight": args.covariance_weight,
+            "uniformity_weight": args.uniformity_weight,
+            "pretrain_lr": args.pretrain_lr,
+            "freeze_lower_blocks": args.freeze_lower_blocks,
+            "hard_freeze_epochs": args.hard_freeze_epochs,
+        },
         "baseline_representation": baseline_metrics,
         "post_representation": post_metrics,
         "detector_benchmark": benchmark_results,
@@ -552,7 +546,7 @@ def main():
         },
     }
 
-    report_path = ROOT / "results/anti_collapse_pilot_2k_report.json"
+    report_path = Path(args.report_path)
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(f"\n[Finished] Benchmark Report saved to {report_path}")

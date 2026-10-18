@@ -1,0 +1,82 @@
+﻿{
+  "config": {
+    "variance_weight": 0.15,
+    "covariance_weight": 0.05,
+    "uniformity_weight": 0.05,
+    "pretrain_lr": 1e-05,
+    "freeze_lower_blocks": 4,
+    "hard_freeze_epochs": 0
+  },
+  "baseline_representation": {
+    "effective_rank": 41.6059455871582,
+    "uniformity": -1.3824026584625244,
+    "inter_image_cosine": 0.624565064907074,
+    "mean_invariance_cosine": 0.8706598579883575,
+    "val_jepa_prediction_loss": 0.7090798371937126,
+    "invariance_fog": 0.895067572593689,
+    "invariance_rain": 0.8972936272621155,
+    "invariance_motion_blur": 0.8845952749252319,
+    "invariance_low_light": 0.8056829571723938
+  },
+  "post_representation": {
+    "effective_rank": 106.7001953125,
+    "uniformity": -0.7403275370597839,
+    "inter_image_cosine": 0.8125947117805481,
+    "mean_invariance_cosine": 0.9286933392286301,
+    "val_jepa_prediction_loss": 0.30478795763337985,
+    "invariance_fog": 0.9398647546768188,
+    "invariance_rain": 0.9502353072166443,
+    "invariance_motion_blur": 0.9221158027648926,
+    "invariance_low_light": 0.9025574922561646
+  },
+  "detector_benchmark": {
+    "clean": {
+      "condition": "Clean",
+      "map50_mean": 16.309479259471132,
+      "map50_std": 0.0,
+      "map50_95_mean": 6.017091433851792,
+      "map50_95_std": 8.881784197001252e-16
+    },
+    "fog_s2": {
+      "condition": "Fog (Sev 2)",
+      "map50_mean": 13.413876807641145,
+      "map50_std": 0.5040202834608738,
+      "map50_95_mean": 4.680298937463303,
+      "map50_95_std": 0.07524405491096436,
+      "retention_rate": 82.24589267527674
+    },
+    "rain_s2": {
+      "condition": "Rain (Sev 2)",
+      "map50_mean": 14.519664283670956,
+      "map50_std": 0.6930635324820915,
+      "map50_95_mean": 5.050966260852121,
+      "map50_95_std": 0.11710194537379219,
+      "retention_rate": 89.02592199710602
+    },
+    "low_light_s2": {
+      "condition": "Low_light (Sev 2)",
+      "map50_mean": 12.425392708344036,
+      "map50_std": 0.28773969388314175,
+      "map50_95_mean": 4.323727178075899,
+      "map50_95_std": 0.09725706410678675,
+      "retention_rate": 76.18509770094863
+    },
+    "motion_blur_s2": {
+      "condition": "Motion_blur (Sev 2)",
+      "map50_mean": 13.885465694023685,
+      "map50_std": 0.0,
+      "map50_95_mean": 5.144105338277895,
+      "map50_95_std": 0.0,
+      "retention_rate": 85.13739447542575
+    },
+    "mean_adverse_s2": {
+      "map50_mean": 13.561099873419955,
+      "retention_rate": 83.14857671218928
+    }
+  },
+  "comparison_reference": {
+    "pure_supervised_vit_2k_map50": 16.16,
+    "old_collapsed_jepa_2k_map50": 8.9,
+    "old_collapsed_uniformity": -0.029
+  }
+}

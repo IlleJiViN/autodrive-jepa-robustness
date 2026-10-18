@@ -131,9 +131,14 @@
   },
   "official_comparisons": {
     "pure_supervised_vit_10k_val_map50": 36.3,
-    "old_collapsed_jepa_2k_val_map50": 8.9,
-    "ours_anti_collapse_jepa_10k_val_map50": 35.595531828439235,
-    "faster_rcnn_coco_pretrained_10k_map50": 34.18,
-    "bdd100k_paper_faster_rcnn_baseline_map50": "32-38%"
+    "pure_supervised_vit_10k_val_map50_95": 17.2,
+    "stage5_collapsed_jepa_10k_val_map50": 34.96,
+    "stage5_collapsed_jepa_2k_val_map50": 8.9,
+    "stage6_anti_collapse_jepa_10k_val_map50": 35.595531828439235,
+    "stage6_anti_collapse_jepa_10k_val_map50_95": 16.49451814067253,
+    "faster_rcnn_coco_zeroshot_256_val_map50": 34.18,
+    "faster_rcnn_coco_zeroshot_note": "Zero-shot COCO-pretrained Faster R-CNN v2 evaluated on 256 val images without BDD100K fine-tuning (sanity-check baseline).",
+    "bdd100k_paper_faster_rcnn_fullres_map50_95": "31-32% mAP50:95 (approx. 55%+ mAP50 at 1280x720)",
+    "invariance_uniformity_tradeoff_note": "Stage 6 resolved single-point collapse (Effective Rank 2.09 -> 176.16) and recovered +0.64%p 10k mAP50 over Stage 5, but aggressive repulsion (var=1.0, cov=0.5, unif=0.5) reduced clean-corrupted invariance cosine (0.8707 -> 0.7293), leaving Pure Supervised ViT-S (36.30%) as the top overall performer."
   }
 }
