@@ -27,6 +27,12 @@
    - 256장 벤치마크 **43.42% mAP50** (mAP50:95 **21.20%**), 공식 10,000장 전수 검증셋에서 **36.30% mAP50** (185,526개 박스) 달성 (**+27.26%p 순수 데이터 스케일업 기여**).
    - 4대 악천후 3-Seed 전수 평가에서 **93.6% 성능 보존율**(Mean Corrupted 40.65%) 입증. COCO 제로샷 Faster R-CNN v2 (34.18%) 수준에 도달하여 실측 베이스라인을 성공적으로 확보. (단, 도메인 전용 2-Stage SOTA 대비 정밀도 17.20%는 고해상도 확장을 통한 개선 과제로 식별).
 
+### 실측 악천후 검출 결과 시각화 (Qualitative Comparison)
+
+![Adverse Weather Detection Comparison](assets/weather_detection_comparison.png)
+
+> **그림 1**: BDD100K 실제 주행 검증 영상에 대한 `FoundationViTDetectorV2`의 실측 검출 비교. 맑은 날(Clean, 좌상단 20개 검출) 대비 짙은 안개(Fog Sev 2, 우상단 13개) 및 폭우(Rain Sev 2, 좌하단 19개), 저조도(Low-Light, 우하단 17개) 환경에서도 전방 버스, SUV, 도로변 차량을 끝까지 안정적으로 추적함.
+
 ---
 
 ## 2. 해결된 5대 핵심 엔지니어링 병목 (5 Core Bottlenecks Resolved)
