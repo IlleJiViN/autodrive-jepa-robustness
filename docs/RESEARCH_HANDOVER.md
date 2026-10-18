@@ -67,7 +67,8 @@
 | **Stage 2** | Foundation ViT-S v1 (Frozen + 단일헤드) | 2,048장 | 100 ep | `5.41%` | `1.55%` | - | Foundation 모델 시각 표현력 복원 |
 | **Stage 3** | **Foundation ViT-S v2 (FPN + CIoU + SLOTS=1)** | **2,048장** | **10 ep** | **`16.16%`** | **`5.77%`** | - | **순수 아키텍처 혁신 기여 (+10.75%p)** 🚀 |
 | **Stage 4** | **Foundation ViT-S v2 (Full Scale Supervised)** | **70,000장** | **12 ep** | **`43.42%`** | **`21.20%`** | **`36.30%`** | **순수 데이터 스케일업 기여 (+27.26%p)** 🏆 |
-| **Stage 5** | **Natural-Noise I-JEPA ViT-S + Detector (Pilot)** | **70,000장** | **5 ep pre + 12 ep det** | **`39.63%`** | **`19.03%`** | **`34.96%`** | **인스턴스 붕괴 발견 (Uniformity -0.029) 및 한계 규명** ⚠️ |
+| **Stage 5** | **Natural-Noise I-JEPA ViT-S (Collapsed Pilot)** | **70,000장** | **5 ep pre + 12 ep det** | **`39.63%`** | **`19.03%`** | **`34.96%`** | **인스턴스 붕괴 발견 (Uniformity -0.029) 및 한계 규명** ⚠️ |
+| **Stage 6** | **Anti-Collapse JEPA ViT-S + Detector V2 (Ours)** | **70,000장** | **5 ep pre + 12 ep det** | **`41.37%`** | **`19.38%`** | **`35.60%`** | **표현 붕괴 완전 극복 (Rank 176.2, Uniformity -1.53, Inter-Cos 0.615) + 공식 10k 전수 실증** 🛡️🏆 |
 
 
 ---

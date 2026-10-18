@@ -1,0 +1,139 @@
+{
+  "benchmark_title": "Anti-Collapse JEPA Full-Scale 70,000-Image Official Benchmark",
+  "timestamp": "2026-10-18 05:59:07",
+  "hardware": "NVIDIA GeForce RTX 5090",
+  "dataset_size": 70000,
+  "pretraining": {
+    "baseline_representation": {
+      "effective_rank": 41.6059455871582,
+      "uniformity": -1.3824026584625244,
+      "inter_image_cosine": 0.624565064907074,
+      "mean_invariance_cosine": 0.8706598579883575,
+      "val_jepa_prediction_loss": 0.7084299582056701,
+      "invariance_fog": 0.895067572593689,
+      "invariance_rain": 0.8972936272621155,
+      "invariance_motion_blur": 0.8845952749252319,
+      "invariance_low_light": 0.8056829571723938
+    },
+    "post_representation": {
+      "effective_rank": 176.1623077392578,
+      "uniformity": -1.5331569910049438,
+      "inter_image_cosine": 0.6154082417488098,
+      "mean_invariance_cosine": 0.7293284088373184,
+      "val_jepa_prediction_loss": 0.2501522453385405,
+      "invariance_fog": 0.7763230204582214,
+      "invariance_rain": 0.7909402251243591,
+      "invariance_motion_blur": 0.6688284277915955,
+      "invariance_low_light": 0.6812219619750977
+    },
+    "delta": {
+      "effective_rank_gain": 134.5563621520996,
+      "uniformity_delta": -0.15075433254241943,
+      "invariance_gain": -0.14133144915103912
+    }
+  },
+  "detector_256_benchmark": {
+    "clean": {
+      "condition": "Clean",
+      "map50_mean": 41.37466696424673,
+      "map50_std": 0.0,
+      "map50_95_mean": 19.37662839373237,
+      "map50_95_std": 0.0
+    },
+    "fog_s2": {
+      "condition": "Fog (Sev 2)",
+      "severity": 2,
+      "map50_mean": 38.8126946416688,
+      "map50_std": 0.8755317862997015,
+      "map50_95_mean": 18.152770151521548,
+      "map50_95_std": 0.6001086389118909,
+      "retention_rate": 93.80787203727388
+    },
+    "rain_s2": {
+      "condition": "Rain (Sev 2)",
+      "severity": 2,
+      "map50_mean": 38.79922551274738,
+      "map50_std": 0.8545264999944547,
+      "map50_95_mean": 18.238441156592554,
+      "map50_95_std": 0.40524215298378985,
+      "retention_rate": 93.77531798932695
+    },
+    "low_light_s2": {
+      "condition": "Low_light (Sev 2)",
+      "severity": 2,
+      "map50_mean": 35.40127048575591,
+      "map50_std": 0.4927897765939936,
+      "map50_95_mean": 16.076480518010673,
+      "map50_95_std": 0.146736502675525,
+      "retention_rate": 85.56267175841528
+    },
+    "motion_blur_s2": {
+      "condition": "Motion_blur (Sev 2)",
+      "severity": 2,
+      "map50_mean": 33.404891628230374,
+      "map50_std": 0.0,
+      "map50_95_mean": 16.265453319107554,
+      "map50_95_std": 0.0,
+      "retention_rate": 80.73754806799217
+    },
+    "mean_adverse_s2": {
+      "severity": 2,
+      "map50_mean": 36.60452056710061,
+      "retention_rate": 88.47085246325204
+    },
+    "fog_s3": {
+      "condition": "Fog (Sev 3)",
+      "severity": 3,
+      "map50_mean": 38.462265384574856,
+      "map50_std": 1.3990871874476114,
+      "map50_95_mean": 18.051546111430675,
+      "map50_95_std": 0.9481356834918365,
+      "retention_rate": 92.96090629034288
+    },
+    "rain_s3": {
+      "condition": "Rain (Sev 3)",
+      "severity": 3,
+      "map50_mean": 37.13118533312411,
+      "map50_std": 0.46151307186963375,
+      "map50_95_mean": 17.301558826121646,
+      "map50_95_std": 0.020213846144366627,
+      "retention_rate": 89.74376848811966
+    },
+    "low_light_s3": {
+      "condition": "Low_light (Sev 3)",
+      "severity": 3,
+      "map50_mean": 28.105391095092035,
+      "map50_std": 0.5209994626034845,
+      "map50_95_mean": 12.655061658595722,
+      "map50_95_std": 0.17611844944995306,
+      "retention_rate": 67.92898446621666
+    },
+    "motion_blur_s3": {
+      "condition": "Motion_blur (Sev 3)",
+      "severity": 3,
+      "map50_mean": 30.80601441147213,
+      "map50_std": 3.552713678800501e-15,
+      "map50_95_mean": 14.837528294568386,
+      "map50_95_std": 0.0,
+      "retention_rate": 74.45622326843782
+    },
+    "mean_adverse_s3": {
+      "severity": 3,
+      "map50_mean": 33.626214056065784,
+      "retention_rate": 81.27247062827927
+    }
+  },
+  "official_10k_validation": {
+    "val_images": 10000,
+    "clean_map50": 35.595531828439235,
+    "clean_map50_95": 16.49451814067253,
+    "inference_seconds": 184.34796857833862
+  },
+  "official_comparisons": {
+    "pure_supervised_vit_10k_val_map50": 36.3,
+    "old_collapsed_jepa_2k_val_map50": 8.9,
+    "ours_anti_collapse_jepa_10k_val_map50": 35.595531828439235,
+    "faster_rcnn_coco_pretrained_10k_map50": 34.18,
+    "bdd100k_paper_faster_rcnn_baseline_map50": "32-38%"
+  }
+}
