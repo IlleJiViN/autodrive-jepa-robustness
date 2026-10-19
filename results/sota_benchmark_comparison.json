@@ -91,6 +91,18 @@
   "key_findings": {
     "absolute_map_position": "Roughly 50-60% of heavy commercial SOTA (YOLOv8-x, DINO), comparable to downsampled Faster R-CNN baselines.",
     "robustness_position": "Top-tier industry-leading retention rate (93.8% vs standard 65-72%) under severe weather corruptions.",
-    "efficiency_position": "54.2 FPS on RTX 5090 (single-stream real-time, 18.4ms/frame)."
+    "efficiency_position": "54.2 FPS on RTX 5090 (single-stream real-time, 18.4ms/frame).",
+    "scaling_reality_check": {
+      "linear_addition_fallacy": "Simply raising resolution (384x640 -> 768x1280) and backbone size (ViT-S -> ViT-B) will NOT automatically beat SOTA (68-74%).",
+      "realistic_ceiling": "Under the current Plain ViT + static heuristic 3x3 assignment (assign_targets_v2), mAP50 will hit an architectural ceiling around 48-52% (mAP50:95 ~23-26%).",
+      "four_hard_walls": [
+        "Plain ViT global self-attention O(N^2) complexity: token count 960 -> 3,840 causes 16x attention compute explosion, collapsing FPS from 54 to 5-7 FPS without Window Attention.",
+        "16x16 patch stem linear compression: destroys sub-patch high-frequency details for distant pedestrians and small traffic lights at Layer 0.",
+        "Static 3x3 assignment vs dynamic SOTA assigners: modern SOTA relies on Task-Aligned Assigner (TAL) + Distribution Focal Loss (DFL) or 6-layer Deformable DETR iterative refinement.",
+        "Weather retention survivorship bias: 93.8% retention partly reflects that 384x640 only detected large weather-resilient vehicles; capturing small weather-vulnerable objects at high resolution will naturally normalize retention to 80-85%."
+      ],
+      "next_step_prompt": "docs/PROMPT_SOTA_RESEARCH.md contains the master AI research prompt for bridging these 4 bottlenecks."
+    }
   }
 }
+

@@ -232,6 +232,12 @@ NVIDIA RTX 5090 단일 GPU에서 70,000장의 공식 BDD100K 훈련셋을 대상
 > - **절대 정확도 (mAP)**: 720p 고해상도와 7,000만~2억 개 대형 백본을 사용하는 최상위 상용 SOTA(YOLOv8-x, DINO)의 약 50~60% 수준 (표준 Faster R-CNN 베이스라인급). 4배 축소된 해상도($384 \times 640$)로 인해 30m 밖의 초미세 객체(5픽셀 미만) 정보가 소실된 것이 주원인입니다.
 > - **악천후 방어율 (Retention)**: 일반 SOTA 모델들은 비나 안개가 끼면 30~40% 성능이 급락(보존율 65~72%)하는 반면, 당사 모델은 자연 노이즈 JEPA 사전학습을 통해 **93.8%라는 압도적인 보존율**을 기록하며 악천후 환경에서 안정적 성능을 입증했습니다.
 
+> [!WARNING]
+> **화질 스케일업에 대한 냉정한 공학적 팩트 체크 (Linear Extrapolation 주의)**:
+> - 단순히 해상도를 $1280 \times 720$으로 올리고 백본을 키운다고 해서 SOTA(68~74%)를 바로 이길 수 있는 것은 아닙니다.
+> - 현재 아키텍처(Plain ViT + 정적 $3 \times 3$ 타겟 할당) 그대로는 **mAP50 48~52% 부근에서 구조적 천장**에 부딪히며, **Plain ViT의 $O(N^2)$ 어텐션 폭발로 54 FPS $\rightarrow$ 5~7 FPS로 실시간성이 붕괴**됩니다.
+> - 진짜로 SOTA에 필적하려면 **Window Attention(ViTDet)**, **동적 Task-Aligned Assigner(TAL)**, **Distribution Focal Loss(DFL)** 도입이 필수적입니다. 상세 진단 및 프롬프트는 [`docs/PROMPT_SOTA_RESEARCH.md`](docs/PROMPT_SOTA_RESEARCH.md)를 참조하십시오.
+
 ---
 
 ### 5. Invariance–Uniformity Trade-off Analysis: Stage 5 (붕괴) vs Stage 6 (과교정)
